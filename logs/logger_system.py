@@ -3,6 +3,7 @@ import datetime
 
 class TeamLogger:
     def __init__(self, filename="index.html"):
+        # We use os.path.join to make sure it saves in the right place
         self.filename = filename
         self._initialize_html()
 
@@ -40,7 +41,7 @@ class TeamLogger:
         """Adds a new row to the log website."""
         now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
-        # Simple color logic for levels
+        # Color logic for levels
         badge_color = "#2ecc71" # Green for INFO
         if level.upper() == "ERROR": badge_color = "#e74c3c" # Red
         if level.upper() == "WARNING": badge_color = "#f1c40f" # Yellow
