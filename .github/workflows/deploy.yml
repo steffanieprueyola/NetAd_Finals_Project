@@ -1,0 +1,26 @@
+name: Update Log Website
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      - name: Run Logger
+        run: python logger_system.py
+      - name: Commit and Push changes
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add index.html
+          git commit -m "Update system logs" || exit 0
+          git push
