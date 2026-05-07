@@ -16,7 +16,7 @@ jobs:
         with:
           python-version: '3.x'
       - name: Run Logger
-        run: python logger_system.py
+        run: python logs/logger_system.py
       - name: Commit and Push changes
         run: |
           git config --global user.name "GitHub Actions"
