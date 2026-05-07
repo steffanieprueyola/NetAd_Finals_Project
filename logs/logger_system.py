@@ -3,12 +3,11 @@ import datetime
 
 class TeamLogger:
     def __init__(self, filename="index.html"):
-        # We use os.path.join to make sure it saves in the right place
-        self.filename = filename
+        # This saves the index.html one folder UP from /logs, into the main directory
+        self.filename = os.path.join(os.path.dirname(__file__), "..", filename)
         self._initialize_html()
 
     def _initialize_html(self):
-        """Creates the website structure if it doesn't exist."""
         if not os.path.exists(self.filename):
             header = """<!DOCTYPE html>
 <html lang="en" data-theme="dark">
@@ -38,13 +37,10 @@ class TeamLogger:
                 f.write(header)
 
     def log(self, component, level, message):
-        """Adds a new row to the log website."""
         now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        
-        # Color logic for levels
-        badge_color = "#2ecc71" # Green for INFO
-        if level.upper() == "ERROR": badge_color = "#e74c3c" # Red
-        if level.upper() == "WARNING": badge_color = "#f1c40f" # Yellow
+        badge_color = "#2ecc71" 
+        if level.upper() == "ERROR": badge_color = "#e74c3c"
+        if level.upper() == "WARNING": badge_color = "#f1c40f"
 
         entry = f"""
                 <tr>
@@ -53,12 +49,10 @@ class TeamLogger:
                     <td style="color:{badge_color}"><strong>{level}</strong></td>
                     <td>{message}</td>
                 </tr>"""
-        
         with open(self.filename, "a") as f:
             f.write(entry)
 
-# --- TEST THE LOGGER ---
 if __name__ == "__main__":
     my_logger = TeamLogger()
-    my_logger.log("API", "INFO", "Server started successfully")
-    my_logger.log("Database", "ERROR", "Connection timeout on port 5432")
+    my_logger.log("API", "INFO", "Logging system initialized")
+    my_logger.log("Network", "WARNING", "High latency detected in hub simulation")
