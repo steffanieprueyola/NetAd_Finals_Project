@@ -1,0 +1,10 @@
+Requirements:
+1. Create a system that shows the logs of activity (who enters and exits, if there are changes in the system, etc.)
+2. Login should be fully secured. Not letting anyone access easily.
+
+Roles: 
+Keith - Camera Integration
+Vinz - Firewall/Access Validation
+Erica - Dashboard (API Backend) 
+JC - Logging System
+Prue - User Authentication/Access Control
