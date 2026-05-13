@@ -7,10 +7,10 @@ body {
   display: none;
 }
 
-.nav-item i svg {
+.nav-item svg {
   filter: invert(1);
-  height: auto;
-  width: 9%;
+  width: 18px;
+  height: 18px;
 }
 
 .btn-block {
