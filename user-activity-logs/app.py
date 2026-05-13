@@ -6,7 +6,7 @@ app = Flask(__name__)
 socketio = SocketIO(app)
 
 # CCTV / IP Camera URL
-camera_url = "rtsp://YOUR_CAMERA_IP"
+camera_url = "rtsp:// " #url
 
 cap = cv2.VideoCapture(camera_url)
 
