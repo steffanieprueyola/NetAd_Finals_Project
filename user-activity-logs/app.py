@@ -7,18 +7,23 @@ import os
 os.makedirs("logs", exist_ok=True)
 
 app = Flask(__name__)
-socketio = SocketIO(app)
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 def write_log(event_type, message):
-    with open("logs/activity.log", "a") as f:
-        time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        f.write(f"{time} | {event_type} | {message}\n")
+    time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        socketio.emit("log_event", {
-            "type": event_type,
-            "message": message,
-            "time": time
-        })
+    log_entry = f"{time} | {event_type} | {message}\n"
+
+    # Save to file
+    with open("logs/activity.log", "a") as f:
+        f.write(log_entry)
+
+    # SEND TO FRONTEND (REAL-TIME)
+    socketio.emit("log_event", {
+        "time": time,
+        "type": event_type,
+        "message": message
+    })
 
 camera_url = "rtsp://CAMERA_IP"
 cap = cv2.VideoCapture(camera_url)
