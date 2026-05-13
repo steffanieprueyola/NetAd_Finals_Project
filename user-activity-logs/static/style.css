@@ -14,7 +14,7 @@ body {
 }
 
 .btn-block {
-  height: 100%;
+  width: 100%;
 }
 
 .camera-stream {
@@ -90,14 +90,18 @@ body {
  * Content
  */
 
-[role="main"] {
-  padding-top: 133px; /* Space for fixed navbar */
+:root {
+  --navbar-height: 80px;
 }
 
 @media (min-width: 768px) {
-  [role="main"] {
-    padding-top: 70px; /* Space for fixed navbar */
+  :root {
+    --navbar-height: 70px;
   }
+}
+
+[role="main"] {
+  padding-top: var(--navbar-height);
 }
 
 /*
