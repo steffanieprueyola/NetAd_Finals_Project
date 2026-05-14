@@ -1,22 +1,18 @@
-from flask import Flask
+from flask import Flask, Response
 from flask_socketio import SocketIO
 import cv2
 import datetime
 import time
 
-# AUTH
 from auth.routes import auth_bp
-
-# DASHBOARD
 from dashboard.routes import dashboard_bp
 
-# CREATE APP
 app = Flask(__name__)
 
 # SECRET KEY
 app.config["SECRET_KEY"] = "change-this-secret-key"
 
-# SOCKETIO
+# SOCKET IO
 socketio = SocketIO(
     app,
     cors_allowed_origins="*",
@@ -34,14 +30,13 @@ cameras = {
     0: 0
 }
 
-# FIND CAMERA
 def find_camera(id):
     try:
         return cameras.get(int(id))
     except:
         return None
 
-# GENERATE FRAMES
+# VIDEO STREAM
 def gen_frames(camera_id):
 
     cam = find_camera(camera_id)
@@ -58,7 +53,8 @@ def gen_frames(camera_id):
         if not success:
             break
 
-        _, buffer = cv2.imencode(".jpg", frame)
+        ret, buffer = cv2.imencode(".jpg", frame)
+
         frame = buffer.tobytes()
 
         yield (
@@ -70,49 +66,48 @@ def gen_frames(camera_id):
 
     cap.release()
 
+# VIDEO FEED ROUTE
+@app.route("/video_feed/<int:id>/")
+def video_feed(id):
+
+    return Response(
+        gen_frames(id),
+        mimetype="multipart/x-mixed-replace; boundary=frame"
+    )
+
 # REAL-TIME LOGS
 def generate_logs():
 
     sample_logs = [
-        {
-            "message": "Motion detected at Camera 1",
-            "type": "warning"
-        },
-        {
-            "message": "Unauthorized access attempt",
-            "type": "danger"
-        },
-        {
-            "message": "Camera connection stable",
-            "type": "success"
-        },
-        {
-            "message": "Face recognition triggered",
-            "type": "info"
-        }
+        {"message": "Motion detected at Camera 1", "type": "warning"},
+        {"message": "Unauthorized access attempt", "type": "danger"},
+        {"message": "Camera connection stable", "type": "success"},
+        {"message": "Person detected in restricted area", "type": "warning"},
+        {"message": "Face recognition triggered", "type": "info"},
+        {"message": "Low light detected", "type": "warning"},
+        {"message": "System scan completed", "type": "success"},
+        {"message": "Object movement detected", "type": "info"}
     ]
 
     while True:
 
-        current_log = sample_logs[
-            int(time.time()) % len(sample_logs)
-        ]
+        current_log = sample_logs[int(time.time()) % len(sample_logs)]
 
-        socketio.emit("new_log", {
+        log = {
             "message": current_log["message"],
             "type": current_log["type"],
-            "time": datetime.datetime.now().strftime(
-                "%Y-%m-%d %H:%M:%S"
-            )
-        })
+            "time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+
+        socketio.emit("new_log", log)
 
         time.sleep(3)
 
+# START BACKGROUND TASK HERE ONLY
+socketio.start_background_task(generate_logs)
+
 # RUN APP
 if __name__ == "__main__":
-
-    # START BACKGROUND TASK HERE
-    socketio.start_background_task(generate_logs)
 
     socketio.run(
         app,
