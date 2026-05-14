@@ -7,7 +7,7 @@ import os
 os.makedirs("logs", exist_ok=True)
 
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
 def write_log(event_type, message):
     time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -25,7 +25,7 @@ def write_log(event_type, message):
         "message": message
     })
 
-camera_url = "rtsp://CAMERA_IP"
+camera_url = 0
 cap = cv2.VideoCapture(camera_url)
 
 def generate_frames():
