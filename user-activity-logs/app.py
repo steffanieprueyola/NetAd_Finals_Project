@@ -26,7 +26,7 @@ def write_log(event_type, message):
     })
 
 camera_url = 0
-#cap = cv2.VideoCapture(camera_url)
+cap = cv2.VideoCapture(camera_url)
 
 def generate_frames():
     while True:
