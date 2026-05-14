@@ -1,4 +1,3 @@
 ADMIN = {
-    "username": "admin",
-    "password": "sinigangnababoy"
+    "admin": "sinigangnababoy"
 }
