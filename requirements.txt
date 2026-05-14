@@ -7,3 +7,4 @@ eventlet==0.35.2
 opencv-python-headless==4.9.0.80
 numpy<2
 Werkzeug==3.0.3
+gunicorn
