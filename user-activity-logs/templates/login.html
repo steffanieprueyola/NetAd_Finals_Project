@@ -94,7 +94,6 @@
 
     .login-card{
 
-      /* WIDER */
       width:430px;
 
       background:rgba(0,0,0,0.72);
@@ -103,7 +102,6 @@
       border:1.5px solid rgba(0,255,170,0.4);
       border-radius:24px;
 
-      /* SHORTER HEIGHT */
       padding:22px 28px;
 
       box-shadow:
@@ -173,11 +171,13 @@
       font-weight:700;
       letter-spacing:1px;
     }
+
     .logo-text{
       display:flex;
       align-items:center;
       justify-content:center;
     }
+
     .group{
       color:#00ffb3;
       font-family:'Orbitron',sans-serif;
@@ -452,7 +452,7 @@
       <div class="logo">
 
         <div class="shield">
-         <span class="logo-text">CCSB</span>
+          <span class="logo-text">CCSB</span>
         </div>
 
         <div class="group">GROUP 1</div>
@@ -473,18 +473,20 @@
 
       <form id="loginForm">
 
+        <!-- USERNAME -->
+
         <div class="input-group">
 
-          <label>OPERATOR ID</label>
+          <label>USERNAME</label>
 
           <div class="input-box">
 
-            <i class="fa-solid fa-id-badge icon"></i>
+            <i class="fa-solid fa-user icon"></i>
 
             <input
               type="text"
-              id="operatorId"
-              placeholder="Enter operator ID"
+              id="username"
+              placeholder="Enter username"
               required
             >
 
@@ -492,18 +494,20 @@
 
         </div>
 
+        <!-- PASSWORD -->
+
         <div class="input-group">
 
-          <label>ACCESS KEY</label>
+          <label>PASSWORD</label>
 
           <div class="input-box">
 
-            <i class="fa-solid fa-key icon"></i>
+            <i class="fa-solid fa-lock icon"></i>
 
             <input
               type="password"
               id="password"
-              placeholder="Enter access key"
+              placeholder="Enter password"
               required
             >
 
@@ -547,7 +551,7 @@
   <script>
 
     const loginForm = document.getElementById("loginForm");
-    const operatorId = document.getElementById("operatorId");
+    const username = document.getElementById("username");
     const password = document.getElementById("password");
     const statusText = document.getElementById("status");
     const togglePassword = document.getElementById("togglePassword");
@@ -578,7 +582,7 @@
 
       e.preventDefault();
 
-      const user = operatorId.value.trim();
+      const user = username.value.trim();
       const pass = password.value.trim();
 
       if(user === "admin" && pass === "1234"){
@@ -588,7 +592,7 @@
 
       } else {
 
-        statusText.textContent = "INVALID OPERATOR ID OR ACCESS KEY";
+        statusText.textContent = "INVALID USERNAME OR PASSWORD";
         statusText.style.color = "#ff4d4d";
 
       }
