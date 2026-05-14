@@ -1,5 +1,4 @@
-users = {
-    "admin": "securepassword",
-    "user1": "sinigang",
-    "user2": "adobo"
+ADMIN = {
+    "username": "admin",
+    "password": "sinigangnababoy"
 }
