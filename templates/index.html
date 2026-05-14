@@ -10,8 +10,7 @@
     />
 
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
-    <script src="{{ url_for('static', filename='js/socket.js') }}"></script>
-    
+
     <title>Security Dashboard</title>
 
     <style>
@@ -74,6 +73,21 @@
         .log-entry.info {
         border-left-color: #17a2b8;
         }
+        .log-entry.warning {
+        border-left-color: orange;
+        }
+        .log-entry.success {
+        border-left-color: limegreen;
+        }
+        
+        .log-entry.danger {
+        border-left-color: red;
+        }
+        
+        .log-entry.info {
+        border-left-color: #17a2b8;
+        }
+        
     </style>
 </head>
 
