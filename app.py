@@ -13,7 +13,7 @@ from dashboard.routes import dashboard_bp
 # CREATE APP
 app = Flask(__name__)
 
-# SECRET KEY (REQUIRED FOR SESSION LOGIN)
+# SECRET KEY
 app.config["SECRET_KEY"] = "change-this-secret-key"
 
 # SOCKETIO
@@ -31,7 +31,7 @@ app.register_blueprint(dashboard_bp)
 
 # CAMERA STORAGE
 cameras = {
-    0: 0  # local webcam
+    0: 0
 }
 
 # FIND CAMERA
@@ -41,7 +41,7 @@ def find_camera(id):
     except:
         return None
 
-# GENERATE CAMERA FRAMES
+# GENERATE FRAMES
 def gen_frames(camera_id):
 
     cam = find_camera(camera_id)
@@ -89,14 +89,6 @@ def generate_logs():
         {
             "message": "Face recognition triggered",
             "type": "info"
-        },
-        {
-            "message": "Low light detected",
-            "type": "warning"
-        },
-        {
-            "message": "Object movement detected",
-            "type": "info"
         }
     ]
 
@@ -116,11 +108,12 @@ def generate_logs():
 
         time.sleep(3)
 
-# START BACKGROUND TASK
-socketio.start_background_task(generate_logs)
-
 # RUN APP
 if __name__ == "__main__":
+
+    # START BACKGROUND TASK HERE
+    socketio.start_background_task(generate_logs)
+
     socketio.run(
         app,
         host="0.0.0.0",
