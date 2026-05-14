@@ -1,5 +1,6 @@
 from flask import Flask, render_template, Response
 from flask_socketio import SocketIO
+from camera.stream import generate_frames
 import cv2
 import datetime
 import os
@@ -24,22 +25,6 @@ def write_log(event_type, message):
         "type": event_type,
         "message": message
     })
-
-camera_url = 0
-cap = cv2.VideoCapture(camera_url)
-
-def generate_frames():
-    while True:
-        success, frame = cap.read()
-
-        if not success:
-            continue
-
-        _, buffer = cv2.imencode('.jpg', frame)
-        frame = buffer.tobytes()
-
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
 @app.route("/")
 def index():
