@@ -1,40 +1,97 @@
-from flask import Flask, render_template, Response
+from flask import Flask, render_template, Response, request
 from flask_socketio import SocketIO
-from camera.stream import generate_frames
 import cv2
 import datetime
-import os
-
-os.makedirs("logs", exist_ok=True)
+import threading
+import time
 
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
-def write_log(event_type, message):
-    time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+# Camera storage
+cameras = {
+    0: 0  # Local webcam
+}
 
-    log_entry = f"{time} | {event_type} | {message}\n"
+def find_camera(id):
+    try:
+        return cameras.get(int(id))
+    except:
+        return None
 
-    # Save to file
-    with open("logs/activity.log", "a") as f:
-        f.write(log_entry)
+def gen_frames(camera_id):
 
-    # SEND TO FRONTEND (REAL-TIME)
-    socketio.emit("log_event", {
-        "time": time,
-        "type": event_type,
-        "message": message
-    })
+    cam = find_camera(camera_id)
 
-@app.route("/")
+    if cam is None:
+        raise Exception("Camera not found.")
+
+    cap = cv2.VideoCapture(cam)
+
+    while True:
+
+        success, frame = cap.read()
+
+        if not success:
+            continue
+
+        else:
+            ret, buffer = cv2.imencode('.jpg', frame)
+            frame = buffer.tobytes()
+
+            yield (
+                b'--frame\r\n'
+                b'Content-Type: image/jpeg\r\n\r\n' +
+                frame +
+                b'\r\n'
+            )
+
+# ROUTES
+
+@app.route('/')
 def index():
-    write_log("VIEW", "Dashboard opened")
-    return render_template("index.html")
+    return render_template('index.html')
 
-@app.route("/video")
-def video():
-    return Response(generate_frames(),
-                    mimetype='multipart/x-mixed-replace; boundary=frame')
+@app.route('/video_feed/<string:id>/')
+def video_feed(id):
 
-if __name__ == "__main__":
-    socketio.run(app, host='0.0.0.0', port=5000, debug=True, allow_unsafe_werkzeug=True)
+    return Response(
+        gen_frames(id),
+        mimetype='multipart/x-mixed-replace; boundary=frame'
+    )
+
+# REAL-TIME LOG GENERATOR
+
+def generate_logs():
+
+    sample_logs = [
+        {"message": "Motion detected at Camera 1", "type": "warning"},
+        {"message": "Unauthorized access attempt", "type": "danger"},
+        {"message": "Camera connection stable", "type": "success"},
+        {"message": "Person detected in restricted area", "type": "warning"},
+        {"message": "Face recognition triggered", "type": "info"},
+        {"message": "Low light detected", "type": "warning"},
+        {"message": "System scan completed", "type": "success"},
+        {"message": "Object movement detected", "type": "info"}
+    ]
+
+    while True:
+
+        current_log = sample_logs[int(time.time()) % len(sample_logs)]
+
+        log = {
+            "message": current_log["message"],
+            "type": current_log["type"],
+            "time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+
+        socketio.emit('new_log', log)
+
+        time.sleep(3)
+        
+# START BACKGROUND THREAD
+
+socketio.start_background_task(generate_logs)
+
+if __name__ == '__main__':
+    socketio.run(app, host='0.0.0.0', port=5000)
