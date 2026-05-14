@@ -1,6 +1,7 @@
 from flask import Flask, render_template, Response, request
 from flask_socketio import SocketIO
 import cv2
+import os
 import datetime
 import threading
 import time
@@ -94,4 +95,9 @@ def generate_logs():
 socketio.start_background_task(generate_logs)
 
 if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0', port=5000)
+    socketio.run(
+    app,
+    host='0.0.0.0',
+    port=int(os.environ.get("PORT", 5000)),
+    allow_unsafe_werkzeug=True
+)
