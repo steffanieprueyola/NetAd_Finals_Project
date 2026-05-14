@@ -117,22 +117,29 @@
 
     const socket = io();
 
-    socket.on('new_log', function(data) {
+socket.on("connect", () => {
+    console.log("Socket connected");
+});
 
-        const logs = document.getElementById("logs");
+socket.on("new_log", function(data) {
 
-        const logEntry = document.createElement("div");
-        logEntry.classList.add("log-entry", data.type || "info");
-        
-        logEntry.innerHTML = `
-            <div>${data.message}</div>
-            <div class="log-time">${data.time}</div>
-        `;
+    const logs = document.getElementById("logs");
 
-        logs.prepend(logEntry);
+    const logEntry = document.createElement("div");
+    logEntry.classList.add("log-entry", data.type || "info");
 
-    });
+    logEntry.innerHTML = `
+        <div>${data.message}</div>
+        <div class="log-time">${data.time}</div>
+    `;
 
+    logs.prepend(logEntry);
+
+    // optional limit
+    if (logs.children.length > 50) {
+        logs.removeChild(logs.lastChild);
+    }
+});
 </script>
 
 </body>
