@@ -1,32 +1,43 @@
 from flask import Flask
 from flask_socketio import SocketIO
 
-# Import modules
+# Core modules
 from auth.routes import auth_bp
 from dashboard.routes import dashboard_bp
 
-# Create app
+# Optional modules (based on your structure)
+from camera.stream import camera_bp
+from security.limiter import security_bp
+
+# Create Flask app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret-key-change-this'
 
-# SocketIO setup (IMPORTANT for live logs)
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet")
+# SocketIO setup (for real-time features like logs, dashboard updates, etc.)
+socketio = SocketIO(
+    app,
+    cors_allowed_origins="*",
+    async_mode="eventlet"
+)
 
-# Register Blueprints (connect group work)
+# Register all blueprints (system modules)
 app.register_blueprint(auth_bp)
 app.register_blueprint(dashboard_bp)
+app.register_blueprint(camera_bp)
+app.register_blueprint(security_bp)
 
-# Optional: test route
+# Health check route
 @app.route("/ping")
 def ping():
     return "Server is running"
 
-# MAIN RUN (Railway compatible)
+# Main execution
 if __name__ == "__main__":
     socketio.run(
-    app,
-    host="0.0.0.0",
-    port=5000,
-    allow_unsafe_werkzeug=True,
-    use_reloader=False
-)
+        app,
+        host="0.0.0.0",
+        port=5000,
+        debug=True,
+        use_reloader=False,
+        allow_unsafe_werkzeug=True
+    )
