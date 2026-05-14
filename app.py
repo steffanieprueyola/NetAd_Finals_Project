@@ -1,17 +1,22 @@
-from flask import Flask, Response
+from flask import Flask
 from flask_socketio import SocketIO
 import cv2
 import datetime
 import time
 
+# AUTH
 from auth.routes import auth_bp
+
+# DASHBOARD
 from dashboard.routes import dashboard_bp
 
+# CREATE APP
 app = Flask(__name__)
 
-# REQUIRED for login session
+# SECRET KEY (REQUIRED FOR SESSION LOGIN)
 app.config["SECRET_KEY"] = "change-this-secret-key"
 
+# SOCKETIO
 socketio = SocketIO(
     app,
     cors_allowed_origins="*",
@@ -20,20 +25,25 @@ socketio = SocketIO(
     engineio_logger=True
 )
 
-# REGISTER BLUEPRINTS (AUTH + DASHBOARD)
+# REGISTER BLUEPRINTS
 app.register_blueprint(auth_bp)
 app.register_blueprint(dashboard_bp)
 
-# Camera storage
-cameras = {0: 0}
+# CAMERA STORAGE
+cameras = {
+    0: 0  # local webcam
+}
 
+# FIND CAMERA
 def find_camera(id):
     try:
         return cameras.get(int(id))
     except:
         return None
 
+# GENERATE CAMERA FRAMES
 def gen_frames(camera_id):
+
     cam = find_camera(camera_id)
 
     if cam is None:
@@ -42,40 +52,74 @@ def gen_frames(camera_id):
     cap = cv2.VideoCapture(cam)
 
     while True:
+
         success, frame = cap.read()
 
         if not success:
-            continue
+            break
 
-        _, buffer = cv2.imencode('.jpg', frame)
+        _, buffer = cv2.imencode(".jpg", frame)
         frame = buffer.tobytes()
 
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+        yield (
+            b"--frame\r\n"
+            b"Content-Type: image/jpeg\r\n\r\n" +
+            frame +
+            b"\r\n"
+        )
 
-# BACKGROUND LOGS
+    cap.release()
+
+# REAL-TIME LOGS
 def generate_logs():
 
     sample_logs = [
-        {"message": "Motion detected at Camera 1", "type": "warning"},
-        {"message": "Unauthorized access attempt", "type": "danger"},
-        {"message": "Camera connection stable", "type": "success"},
-        {"message": "Face recognition triggered", "type": "info"}
+        {
+            "message": "Motion detected at Camera 1",
+            "type": "warning"
+        },
+        {
+            "message": "Unauthorized access attempt",
+            "type": "danger"
+        },
+        {
+            "message": "Camera connection stable",
+            "type": "success"
+        },
+        {
+            "message": "Face recognition triggered",
+            "type": "info"
+        },
+        {
+            "message": "Low light detected",
+            "type": "warning"
+        },
+        {
+            "message": "Object movement detected",
+            "type": "info"
+        }
     ]
 
     while True:
-        log = sample_logs[int(time.time()) % len(sample_logs)]
+
+        current_log = sample_logs[
+            int(time.time()) % len(sample_logs)
+        ]
 
         socketio.emit("new_log", {
-            "message": log["message"],
-            "type": log["type"],
-            "time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            "message": current_log["message"],
+            "type": current_log["type"],
+            "time": datetime.datetime.now().strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
         })
 
         time.sleep(3)
 
+# START BACKGROUND TASK
 socketio.start_background_task(generate_logs)
 
+# RUN APP
 if __name__ == "__main__":
     socketio.run(
         app,
