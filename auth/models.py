@@ -1,3 +1,3 @@
 ADMIN = {
-    "admin": "sinigangnababoy"
+    "hotmariaclara": "likekotsengmagaradontneedamekaniko"
 }
