@@ -4,8 +4,7 @@ from flask_socketio import emit
 import cv2
 import time
 import datetime
-from app import socketio
-
+from extensions import socketio
 
 # ---------------- LOGIN PROTECTION ----------------
 @dashboard_bp.route("/dashboard")
