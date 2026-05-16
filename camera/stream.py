@@ -3,7 +3,7 @@ import cv2
 # CHANGE THIS depending on your camera
 # 0 = laptop webcam
 # or "rtsp://username:password@ip_address:554/stream"
-camera_source = 0
+camera_source = "rtsp://admin:nyawa011306@192.168.1.126:10554/tcp/av0_0"
 
 cap = cv2.VideoCapture(camera_source)
 
