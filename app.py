@@ -16,45 +16,67 @@ app.config["SECRET_KEY"] = "change-this-secret-key"
 socketio = SocketIO(
     app,
     cors_allowed_origins="*",
-    async_mode="threading",
-    logger=True,
-    engineio_logger=True
+    async_mode="threading"
 )
 
 # REGISTER BLUEPRINTS
 app.register_blueprint(auth_bp)
 app.register_blueprint(dashboard_bp)
 
-# CAMERA STORAGE
+# =========================================
+# CAMERA SOURCE
+# =========================================
+
+# LOCAL WEBCAM TEST
+# cameras = {
+#     0: 0
+# }
+
+# RTSP CAMERA TEST
 cameras = {
-    0: 0
+    0: "rtsp://username:password@192.168.1.100:554/stream"
 }
 
-def find_camera(id):
+# Example IP Webcam
+# cameras = {
+#     0: "http://192.168.1.5:8080/video"
+# }
+
+# =========================================
+# CAMERA FUNCTIONS
+# =========================================
+
+def find_camera(camera_id):
     try:
-        return cameras.get(int(id))
+        return cameras.get(int(camera_id))
     except:
         return None
 
-# VIDEO STREAM
 def gen_frames(camera_id):
 
     cam = find_camera(camera_id)
 
     if cam is None:
-        raise Exception("Camera not found.")
+        print("Camera not found")
+        return
+
+    print(f"Opening camera stream: {cam}")
 
     cap = cv2.VideoCapture(cam)
+
+    if not cap.isOpened():
+        print("FAILED TO OPEN CAMERA")
+        return
 
     while True:
 
         success, frame = cap.read()
 
         if not success:
+            print("FAILED TO READ FRAME")
             break
 
-        ret, buffer = cv2.imencode(".jpg", frame)
-
+        _, buffer = cv2.imencode(".jpg", frame)
         frame = buffer.tobytes()
 
         yield (
@@ -64,9 +86,10 @@ def gen_frames(camera_id):
             b"\r\n"
         )
 
-    cap.release()
-
+# =========================================
 # VIDEO FEED ROUTE
+# =========================================
+
 @app.route("/video_feed/<int:id>/")
 def video_feed(id):
 
@@ -75,17 +98,18 @@ def video_feed(id):
         mimetype="multipart/x-mixed-replace; boundary=frame"
     )
 
+# =========================================
 # REAL-TIME LOGS
+# =========================================
+
 def generate_logs():
 
     sample_logs = [
         {"message": "Motion detected at Camera 1", "type": "warning"},
         {"message": "Unauthorized access attempt", "type": "danger"},
         {"message": "Camera connection stable", "type": "success"},
-        {"message": "Person detected in restricted area", "type": "warning"},
         {"message": "Face recognition triggered", "type": "info"},
         {"message": "Low light detected", "type": "warning"},
-        {"message": "System scan completed", "type": "success"},
         {"message": "Object movement detected", "type": "info"}
     ]
 
@@ -103,10 +127,13 @@ def generate_logs():
 
         time.sleep(3)
 
-# START BACKGROUND TASK HERE ONLY
+# START LOG THREAD
 socketio.start_background_task(generate_logs)
 
+# =========================================
 # RUN APP
+# =========================================
+
 if __name__ == "__main__":
 
     socketio.run(
